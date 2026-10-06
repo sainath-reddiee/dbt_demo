@@ -1,0 +1,20 @@
+# Skills applied: DBT-ONBOARD-SOURCE, SILVER-MODEL, GDP_DOMAIN_SKILL.
+# Compile-only. Do not execute Iceberg DDL, watermark inserts, or gold readiness from those skills.
+name: gdp_lightbox
+version: '1.0.0'
+config-version: 2
+profile: gdp_platform
+model-paths: ["models"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target"]
+models:
+  gdp_lightbox:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: ephemeral
+    marts:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +on_schema_change: fail

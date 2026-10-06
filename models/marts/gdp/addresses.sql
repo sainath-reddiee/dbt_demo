@@ -1,0 +1,35 @@
+{{ config(materialized='incremental', unique_key='customer_id', incremental_strategy='merge', on_schema_change='fail') }}
+
+-- generated from approved mapping document 289dc4a1-ce28-498a-8929-32a00b524acc
+select
+    CAST(address AS VARCHAR) as address,
+    CAST(address_confidence_score AS NUMBER(38,0)) as address_confidence_score,
+    CAST(address_lid AS VARCHAR) as address_lid,
+    CAST(building_name_usps AS VARCHAR) as building_name_usps,
+    CAST(census_code AS VARCHAR) as census_code,
+    CAST(city AS VARCHAR) as city,
+    CAST(country_code AS VARCHAR) as country_code,
+    CAST(county AS VARCHAR) as county,
+    CAST(fips_code AS VARCHAR) as fips_code,
+    null as gdp_inserted_ts,
+    null as gdp_is_active,
+    null as gdp_row_hash,
+    null as gdp_updated_ts,
+    CAST(geometry AS GEOGRAPHY) as geometry,
+    CAST(house_number AS VARCHAR) as house_number,
+    CAST(is_primary_address AS NUMBER(38,0)) as is_primary_address,
+    CAST(latitude AS FLOAT) as latitude,
+    CAST(longitude AS FLOAT) as longitude,
+    CAST(parent_address_lid AS VARCHAR) as parent_address_lid,
+    CAST(precision_code AS VARCHAR) as precision_code,
+    CAST(prefix_direction AS VARCHAR) as prefix_direction,
+    CAST(prefix_type AS VARCHAR) as prefix_type,
+    CAST(primary_address_lid AS VARCHAR) as primary_address_lid,
+    CAST(resbus_usps AS VARCHAR) as resbus_usps,
+    CAST(state AS VARCHAR) as state,
+    CAST(street_name AS VARCHAR) as street_name,
+    CAST(suffix_direction AS VARCHAR) as suffix_direction,
+    CAST(suffix_type AS VARCHAR) as suffix_type,
+    CAST(unit AS VARCHAR) as unit,
+    CAST(zip AS VARCHAR) as zip
+from {{ ref('int_addresses__deduped') }}

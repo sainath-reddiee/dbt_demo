@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: addresses
+    description: "One row per business key of ADDRESSES, snapshotted from the existing table."
+    columns:
+      - name: address
+        description: ""
+      - name: address_confidence_score
+        description: ""
+      - name: address_lid
+        description: ""
+      - name: building_name_usps
+        description: ""
+      - name: census_code
+        description: ""
+      - name: city
+        description: ""
+      - name: country_code
+        description: ""
+      - name: county
+        description: ""
+      - name: fips_code
+        description: ""
+      - name: gdp_inserted_ts
+        description: ""
+      - name: gdp_is_active
+        description: ""
+      - name: gdp_row_hash
+        description: ""
+      - name: gdp_updated_ts
+        description: ""
+      - name: geometry
+        description: ""
+      - name: house_number
+        description: ""
+      - name: is_primary_address
+        description: ""
+      - name: latitude
+        description: ""
+      - name: longitude
+        description: ""
+      - name: parent_address_lid
+        description: ""
+      - name: precision_code
+        description: ""
+      - name: prefix_direction
+        description: ""
+      - name: prefix_type
+        description: ""
+      - name: primary_address_lid
+        description: ""
+      - name: resbus_usps
+        description: ""
+      - name: state
+        description: ""
+      - name: street_name
+        description: ""
+      - name: suffix_direction
+        description: ""
+      - name: suffix_type
+        description: ""
+      - name: unit
+        description: ""
+      - name: zip
+        description: ""
