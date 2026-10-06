@@ -1,0 +1,19 @@
+checks for addresses:
+  - row_count > 0:
+      name: The mart must not be empty after the load.
+  - schema:
+      fail:
+        when wrong column type:
+          ADDRESS: VARCHAR(100)
+          ADDRESS_CONFIDENCE_SCORE: NUMBER(38,0)
+          ADDRESS_LID: VARCHAR(50)
+          BUILDING_NAME_USPS: VARCHAR(200)
+          CENSUS_CODE: VARCHAR(100)
+          CITY: VARCHAR(100)
+          COUNTRY_CODE: VARCHAR(100)
+          COUNTY: VARCHAR(100)
+          FIPS_CODE: VARCHAR(5)
+          GDP_INSERTED_TS: TIMESTAMP_NTZ
+          GDP_IS_ACTIVE: BOOLEAN
+          GDP_ROW_HASH: BINARY:
+      name: Required STTM columns must be present on the dataset.

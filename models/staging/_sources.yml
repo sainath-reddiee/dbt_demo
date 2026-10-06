@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: lightbox
+    database: DEV_AI_PLATFORM
+    schema: LANDING
+    tables:
+      - name: buildings
+        identifier: LIGHTBOX__BUILDINGS
+      - name: addresses
+        identifier: LIGHTBOX__ADDRESSES

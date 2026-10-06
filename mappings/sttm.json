@@ -1,0 +1,319 @@
+{
+  "sttm_id": "289dc4a1-ce28-498a-8929-32a00b524acc",
+  "table_design": {
+    "business_keys": [],
+    "dedup": "one row per source object",
+    "grain": "One row per business key of ADDRESSES, snapshotted from the existing table.",
+    "incremental_strategy": "merge",
+    "join_paths": [],
+    "scd_type": "1",
+    "source_tables": [
+      "ADDRESSES"
+    ],
+    "target_database": "DEV_GDP_BRONZE_DB",
+    "target_schema": "BRONZE_LIGHTBOX",
+    "target_table": "ADDRESSES"
+  },
+  "lines": [
+    {
+      "target_column": "ADDRESS",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "ADDRESS",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "ADDRESS_CONFIDENCE_SCORE",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "ADDRESSES",
+      "source_column": "ADDRESS_CONFIDENCE_SCORE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "ADDRESS_LID",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "ADDRESSES",
+      "source_column": "ADDRESS_LID",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "BUILDING_NAME_USPS",
+      "target_datatype": "VARCHAR(200)",
+      "source_table": "ADDRESSES",
+      "source_column": "BUILDING_NAME_USPS",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "CENSUS_CODE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "CENSUS_CODE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "CITY",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "CITY",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "COUNTRY_CODE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "COUNTRY_CODE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "COUNTY",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "COUNTY",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "FIPS_CODE",
+      "target_datatype": "VARCHAR(5)",
+      "source_table": "ADDRESSES",
+      "source_column": "FIPS_CODE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "GDP_INSERTED_TS",
+      "target_datatype": "TIMESTAMP_NTZ",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "GDP_IS_ACTIVE",
+      "target_datatype": "BOOLEAN",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "GDP_ROW_HASH",
+      "target_datatype": "BINARY",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "GDP_UPDATED_TS",
+      "target_datatype": "TIMESTAMP_NTZ",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "GEOMETRY",
+      "target_datatype": "GEOGRAPHY",
+      "source_table": "ADDRESSES",
+      "source_column": "GEOMETRY",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "HOUSE_NUMBER",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "HOUSE_NUMBER",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "IS_PRIMARY_ADDRESS",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "ADDRESSES",
+      "source_column": "IS_PRIMARY_ADDRESS",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "LATITUDE",
+      "target_datatype": "FLOAT",
+      "source_table": "ADDRESSES",
+      "source_column": "LATITUDE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "LONGITUDE",
+      "target_datatype": "FLOAT",
+      "source_table": "ADDRESSES",
+      "source_column": "LONGITUDE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "PARENT_ADDRESS_LID",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "ADDRESSES",
+      "source_column": "PARENT_ADDRESS_LID",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "PRECISION_CODE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "PRECISION_CODE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "PREFIX_DIRECTION",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "PREFIX_DIRECTION",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "PREFIX_TYPE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "PREFIX_TYPE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "PRIMARY_ADDRESS_LID",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "ADDRESSES",
+      "source_column": "PRIMARY_ADDRESS_LID",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "RESBUS_USPS",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "RESBUS_USPS",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "STATE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "STATE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "STREET_NAME",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "STREET_NAME",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "SUFFIX_DIRECTION",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "SUFFIX_DIRECTION",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "SUFFIX_TYPE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "SUFFIX_TYPE",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "UNIT",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "ADDRESSES",
+      "source_column": "UNIT",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    },
+    {
+      "target_column": "ZIP",
+      "target_datatype": "VARCHAR(10)",
+      "source_table": "ADDRESSES",
+      "source_column": "ZIP",
+      "source_datatype": null,
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": null
+    }
+  ]
+}
