@@ -1,0 +1,340 @@
+{
+  "sttm_id": "2675d4d8-5b9c-43e4-82a1-9da848c7dbf4",
+  "table_design": {
+    "business_keys": [],
+    "dedup": "one row per source object",
+    "driving_table": "RAW_ORDERS",
+    "grain": "One row per business key of DIM_CUSTOMERS, snapshotted from the existing table.",
+    "incremental_strategy": "merge",
+    "join_graph": {
+      "ambiguities": [],
+      "driving_table": "RAW_ORDERS",
+      "edited": true,
+      "joins": [
+        {
+          "alternatives": [],
+          "cardinality": "1:N",
+          "condition": "RAW_ORDERS.ORDER_ID = RAW_ORDER_ITEMS.ORDER_ID",
+          "confidence": 1,
+          "fan_out": true,
+          "join_type": "LEFT",
+          "keys": [
+            "ORDER_ID=ORDER_ID"
+          ],
+          "left_table": "RAW_ORDERS",
+          "reasoning": "set by reviewer",
+          "right_table": "RAW_ORDER_ITEMS",
+          "source": "manual",
+          "status": "CONFIRMED"
+        },
+        {
+          "alternatives": [],
+          "cardinality": "N:1",
+          "condition": "RAW_ORDER_ITEMS.PRODUCT_ID = RAW_PRODUCTS.PRODUCT_ID",
+          "confidence": 1,
+          "fan_out": false,
+          "join_type": "LEFT",
+          "keys": [
+            "PRODUCT_ID"
+          ],
+          "left_table": "RAW_ORDER_ITEMS",
+          "reasoning": "set by reviewer",
+          "right_table": "RAW_PRODUCTS",
+          "source": "manual",
+          "status": "CONFIRMED"
+        },
+        {
+          "alternatives": [],
+          "cardinality": "N:1",
+          "condition": "RAW_ORDER_ITEMS.QUANTITY = RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER",
+          "confidence": 1,
+          "fan_out": false,
+          "join_type": "LEFT",
+          "keys": [
+            "QUANTITY=METADATA_ROW_NUMBER"
+          ],
+          "left_table": "RAW_ORDER_ITEMS",
+          "reasoning": "set by reviewer",
+          "right_table": "RAW_WEBSITE_EVENTS",
+          "source": "manual",
+          "status": "CONFIRMED"
+        }
+      ],
+      "unreachable": [
+        "RAW_CUSTOMERS",
+        "RAW_EVENTS"
+      ]
+    },
+    "join_paths": [
+      "RAW_ORDERS.ORDER_ID = RAW_ORDER_ITEMS.ORDER_ID",
+      "RAW_ORDER_ITEMS.PRODUCT_ID = RAW_PRODUCTS.PRODUCT_ID",
+      "RAW_ORDER_ITEMS.QUANTITY = RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER"
+    ],
+    "scd_type": "1",
+    "source_tables": [
+      "RAW_CUSTOMERS",
+      "RAW_EVENTS",
+      "RAW_ORDERS",
+      "RAW_ORDER_ITEMS",
+      "RAW_PRODUCTS",
+      "RAW_WEBSITE_EVENTS"
+    ],
+    "target_database": "DE_DEMO_PROD",
+    "target_schema": "SILVER",
+    "target_table": "DIM_CUSTOMERS"
+  },
+  "lines": [
+    {
+      "target_column": "CATEGORY",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "CATEGORY",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.CATEGORY"
+    },
+    {
+      "target_column": "CREATED_DATE",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "CREATED_DATE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.CREATED_DATE"
+    },
+    {
+      "target_column": "CUSTOMER_ID",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "CUSTOMER_ID",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.CUSTOMER_ID"
+    },
+    {
+      "target_column": "DISCOUNT_PCT",
+      "target_datatype": "NUMBER(5,2)",
+      "source_table": "RAW_ORDER_ITEMS",
+      "source_column": "DISCOUNT_PCT",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDER_ITEMS.DISCOUNT_PCT"
+    },
+    {
+      "target_column": "EVENT_DATA",
+      "target_datatype": "VARIANT",
+      "source_table": "RAW_EVENTS",
+      "source_column": "EVENT_DATA",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_EVENTS.EVENT_DATA"
+    },
+    {
+      "target_column": "EVENT_TYPE",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "RAW_EVENTS",
+      "source_column": "EVENT_TYPE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_EVENTS.EVENT_TYPE"
+    },
+    {
+      "target_column": "IS_ACTIVE",
+      "target_datatype": "VARCHAR(10)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "IS_ACTIVE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.IS_ACTIVE"
+    },
+    {
+      "target_column": "LOAD_TIMESTAMP",
+      "target_datatype": "TIMESTAMP_NTZ",
+      "source_table": "RAW_CUSTOMERS",
+      "source_column": "LOAD_TIMESTAMP",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_CUSTOMERS.LOAD_TIMESTAMP"
+    },
+    {
+      "target_column": "METADATA_FILENAME",
+      "target_datatype": "VARCHAR(500)",
+      "source_table": "RAW_WEBSITE_EVENTS",
+      "source_column": "METADATA_FILENAME",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_WEBSITE_EVENTS.METADATA_FILENAME"
+    },
+    {
+      "target_column": "METADATA_ROW_NUMBER",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_WEBSITE_EVENTS",
+      "source_column": "METADATA_ROW_NUMBER",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER"
+    },
+    {
+      "target_column": "ORDER_DATE",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "ORDER_DATE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.ORDER_DATE"
+    },
+    {
+      "target_column": "ORDER_ID",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "ORDER_ID",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.ORDER_ID"
+    },
+    {
+      "target_column": "ORDER_ITEM_ID",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_ORDER_ITEMS",
+      "source_column": "ORDER_ITEM_ID",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDER_ITEMS.ORDER_ITEM_ID"
+    },
+    {
+      "target_column": "ORDER_STATUS",
+      "target_datatype": "VARCHAR(20)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "ORDER_STATUS",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.ORDER_STATUS"
+    },
+    {
+      "target_column": "PAYMENT_METHOD",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "PAYMENT_METHOD",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.PAYMENT_METHOD"
+    },
+    {
+      "target_column": "PRODUCT_ID",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_ORDER_ITEMS",
+      "source_column": "PRODUCT_ID",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDER_ITEMS.PRODUCT_ID"
+    },
+    {
+      "target_column": "PRODUCT_NAME",
+      "target_datatype": "VARCHAR(200)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "PRODUCT_NAME",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.PRODUCT_NAME"
+    },
+    {
+      "target_column": "QUANTITY",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_ORDER_ITEMS",
+      "source_column": "QUANTITY",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDER_ITEMS.QUANTITY"
+    },
+    {
+      "target_column": "RAW_DATA",
+      "target_datatype": "VARIANT",
+      "source_table": "RAW_CUSTOMERS",
+      "source_column": "RAW_DATA",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_CUSTOMERS.RAW_DATA"
+    },
+    {
+      "target_column": "RECEIVED_AT",
+      "target_datatype": "TIMESTAMP_NTZ",
+      "source_table": "RAW_EVENTS",
+      "source_column": "RECEIVED_AT",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_EVENTS.RECEIVED_AT"
+    },
+    {
+      "target_column": "RECORD_METADATA",
+      "target_datatype": "VARIANT",
+      "source_table": "RAW_CUSTOMERS",
+      "source_column": "RECORD_METADATA",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_CUSTOMERS.RECORD_METADATA"
+    },
+    {
+      "target_column": "SHIPPING_ADDRESS",
+      "target_datatype": "VARCHAR(500)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "SHIPPING_ADDRESS",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.SHIPPING_ADDRESS"
+    },
+    {
+      "target_column": "SOURCE_FILE",
+      "target_datatype": "VARCHAR(500)",
+      "source_table": "RAW_CUSTOMERS",
+      "source_column": "SOURCE_FILE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_CUSTOMERS.SOURCE_FILE"
+    },
+    {
+      "target_column": "SOURCE_SYSTEM",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "SOURCE_SYSTEM",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.SOURCE_SYSTEM"
+    },
+    {
+      "target_column": "SUB_CATEGORY",
+      "target_datatype": "VARCHAR(100)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "SUB_CATEGORY",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.SUB_CATEGORY"
+    },
+    {
+      "target_column": "SUPPLIER_ID",
+      "target_datatype": "NUMBER(38,0)",
+      "source_table": "RAW_PRODUCTS",
+      "source_column": "SUPPLIER_ID",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_PRODUCTS.SUPPLIER_ID"
+    },
+    {
+      "target_column": "TOTAL_AMOUNT",
+      "target_datatype": "VARCHAR(50)",
+      "source_table": "RAW_ORDERS",
+      "source_column": "TOTAL_AMOUNT",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDERS.TOTAL_AMOUNT"
+    },
+    {
+      "target_column": "UNIT_PRICE",
+      "target_datatype": "NUMBER(10,2)",
+      "source_table": "RAW_ORDER_ITEMS",
+      "source_column": "UNIT_PRICE",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "From RAW_ORDER_ITEMS.UNIT_PRICE"
+    }
+  ]
+}
