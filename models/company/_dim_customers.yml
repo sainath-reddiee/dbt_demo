@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "One row per business key of DIM_CUSTOMERS, snapshotted from the existing table."
+    columns:
+      - name: source_unique_id
+        description: "profiled as unique: ORDER_ID (confirm business keys in the STTM)"
+        tests:
+          - not_null
+          - unique
+      - name: raw_data
+        description: "From RAW_CUSTOMERS.RAW_DATA"
+      - name: source_file
+        description: "From RAW_CUSTOMERS.SOURCE_FILE"
+      - name: load_timestamp
+        description: "From RAW_CUSTOMERS.LOAD_TIMESTAMP"
+      - name: record_metadata
+        description: "From RAW_CUSTOMERS.RECORD_METADATA"
+      - name: event_data
+        description: "From RAW_EVENTS.EVENT_DATA"
+      - name: event_type
+        description: "From RAW_EVENTS.EVENT_TYPE"
+      - name: received_at
+        description: "From RAW_EVENTS.RECEIVED_AT"
+      - name: order_id
+        description: "From RAW_ORDERS.ORDER_ID"
+      - name: customer_id
+        description: "From RAW_ORDERS.CUSTOMER_ID"
+      - name: order_date
+        description: "From RAW_ORDERS.ORDER_DATE"
+      - name: order_status
+        description: "From RAW_ORDERS.ORDER_STATUS"
+      - name: total_amount
+        description: "From RAW_ORDERS.TOTAL_AMOUNT"
+      - name: shipping_address
+        description: "From RAW_ORDERS.SHIPPING_ADDRESS"
+      - name: payment_method
+        description: "From RAW_ORDERS.PAYMENT_METHOD"
+      - name: source_system
+        description: "From RAW_ORDERS.SOURCE_SYSTEM"
+      - name: order_item_id
+        description: "From RAW_ORDER_ITEMS.ORDER_ITEM_ID"
+      - name: product_id
+        description: "From RAW_ORDER_ITEMS.PRODUCT_ID"
+      - name: quantity
+        description: "From RAW_ORDER_ITEMS.QUANTITY"
+      - name: unit_price
+        description: "From RAW_ORDER_ITEMS.UNIT_PRICE"
+      - name: discount_pct
+        description: "From RAW_ORDER_ITEMS.DISCOUNT_PCT"
+      - name: product_name
+        description: "From RAW_PRODUCTS.PRODUCT_NAME"
+      - name: category
+        description: "From RAW_PRODUCTS.CATEGORY"
+      - name: sub_category
+        description: "From RAW_PRODUCTS.SUB_CATEGORY"
+      - name: supplier_id
+        description: "From RAW_PRODUCTS.SUPPLIER_ID"
+      - name: is_active
+        description: "From RAW_PRODUCTS.IS_ACTIVE"
+      - name: created_date
+        description: "From RAW_PRODUCTS.CREATED_DATE"
+      - name: metadata_filename
+        description: "From RAW_WEBSITE_EVENTS.METADATA_FILENAME"
+      - name: metadata_row_number
+        description: "From RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER"
