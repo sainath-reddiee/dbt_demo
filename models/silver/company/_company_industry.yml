@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: company_industry
+    description: "one row per SOURCE_UNIQUE_ID per REF_GDP_SOURCE_SYSTEM_SKEY"
+    columns:
+      - name: source_unique_id
+        description: "STTM business keys"
+        tests:
+          - not_null
+          - unique
+      - name: company_industry_skey
+        description: "sequence"
+        tests:
+          - not_null
+      - name: ref_gdp_source_system_skey
+        tests:
+          - not_null
+      - name: company_core_skey
+        description: "FK"
+      - name: ref_industry_name_skey
+      - name: source_naics_code
+      - name: source_naics_description
+      - name: is_primary_industry
+      - name: company_industry_hkey
+        tests:
+          - not_null
+      - name: gdp_is_active
+        tests:
+          - not_null
+      - name: gdp_inserted_ts
+        tests:
+          - not_null
+      - name: gdp_inserted_by
+        tests:
+          - not_null
+      - name: gdp_updated_ts
+        tests:
+          - not_null
+      - name: gdp_updated_by
+        tests:
+          - not_null
