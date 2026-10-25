@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: company_hierarchy
+    description: "one row per SOURCE_UNIQUE_ID per REF_GDP_SOURCE_SYSTEM_SKEY"
+    columns:
+      - name: source_unique_id
+        description: "STTM business keys"
+        tests:
+          - not_null
+          - unique
+      - name: company_hierarchy_skey
+        description: "sequence"
+        tests:
+          - not_null
+      - name: ref_gdp_source_system_skey
+        tests:
+          - not_null
+      - name: company_core_skey
+        description: "FK"
+      - name: company_name
+      - name: ref_company_type_skey
+      - name: domestic_parent_skey
+        description: "NOT `REF_DOMESTIC_PARENT_SKEY` per STTM"
+      - name: global_parent_skey
+      - name: hierarchy_level
+      - name: hierarchy_path
+        description: "pipe-delimited SKEY chain"
+      - name: valid_from
+      - name: valid_to
+      - name: ref_hierarchy_type_skey
+      - name: company_hierarchy_hkey
+        tests:
+          - not_null
+      - name: gdp_is_active
+        tests:
+          - not_null
+      - name: gdp_inserted_ts
+        tests:
+          - not_null
+      - name: gdp_inserted_by
+        tests:
+          - not_null
+      - name: gdp_updated_ts
+        tests:
+          - not_null
+      - name: gdp_updated_by
+        tests:
+          - not_null
+      - name: immediate_parent_skey
