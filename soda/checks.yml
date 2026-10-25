@@ -1,242 +1,71 @@
-checks for dim_customers:
+checks for company_industry:
   - row_count > 0:
-      name: The mart must not be empty after the load.
+      name: 'The mart must not be empty after the load.'
   - schema:
       fail:
+        when required column missing: [COMPANY_INDUSTRY_HKEY, COMPANY_INDUSTRY_SKEY, GDP_INSERTED_BY, GDP_INSERTED_TS, GDP_IS_ACTIVE, GDP_UPDATED_BY, GDP_UPDATED_TS, REF_GDP_SOURCE_SYSTEM_SKEY, SOURCE_UNIQUE_ID]
         when wrong column type:
-          CATEGORY: VARCHAR(100)
-          CREATED_DATE: VARCHAR(50)
-          CUSTOMER_ID: NUMBER(38,0)
-          DISCOUNT_PCT: NUMBER(5,2)
-          EVENT_DATA: VARIANT
-          EVENT_TYPE: VARCHAR(100)
-          IS_ACTIVE: VARCHAR(10)
-          LOAD_TIMESTAMP: TIMESTAMP_NTZ
-          METADATA_FILENAME: VARCHAR(500)
-          METADATA_ROW_NUMBER: NUMBER(38,0)
-          ORDER_DATE: VARCHAR(50)
-          ORDER_ID: NUMBER(38,0)
-      name: Required STTM columns must be present on the dataset.
-  - missing_count(CATEGORY):
-      name: CATEGORY had no missing values in the profiled source.
+          COMPANY_CORE_SKEY: NUMBER(38,0)
+          COMPANY_INDUSTRY_HKEY: TEXT
+          COMPANY_INDUSTRY_SKEY: NUMBER(38,0)
+          GDP_INSERTED_BY: TEXT
+          GDP_INSERTED_TS: TIMESTAMP_NTZ(6)
+          GDP_IS_ACTIVE: BOOLEAN
+          GDP_UPDATED_BY: TEXT
+          GDP_UPDATED_TS: TIMESTAMP_NTZ(6)
+          IS_PRIMARY_INDUSTRY: BOOLEAN
+          REF_GDP_SOURCE_SYSTEM_SKEY: NUMBER(38,0)
+          REF_INDUSTRY_NAME_SKEY: NUMBER(38,0)
+          SOURCE_NAICS_CODE: TEXT
+      name: 'Required STTM columns must be present on the dataset.'
+  - duplicate_count(SOURCE_UNIQUE_ID, REF_GDP_SOURCE_SYSTEM_SKEY) = 0:
+      name: 'Business key of the dimension must be unique.'
+  - missing_count(SOURCE_UNIQUE_ID) = 0:
+      name: 'Business key cannot be missing.'
+  - missing_count(REF_GDP_SOURCE_SYSTEM_SKEY) = 0:
+      name: 'Business key cannot be missing.'
+  - missing_count(COMPANY_INDUSTRY_HKEY) = 0:
+      name: 'COMPANY_INDUSTRY_HKEY is required by the STTM.'
+  - missing_count(COMPANY_INDUSTRY_SKEY) = 0:
+      name: 'COMPANY_INDUSTRY_SKEY is required by the STTM.'
+  - missing_count(GDP_INSERTED_BY) = 0:
+      name: 'GDP_INSERTED_BY is required by the STTM.'
+  - freshness(GDP_INSERTED_BY):
+      name: 'GDP_INSERTED_BY should be fresher than one day.'
+      warn: when > 1d
+  - missing_count(GDP_INSERTED_TS) = 0:
+      name: 'GDP_INSERTED_TS is required by the STTM.'
+  - freshness(GDP_INSERTED_TS):
+      name: 'GDP_INSERTED_TS should be fresher than one day.'
+      warn: when > 1d
+  - missing_count(GDP_IS_ACTIVE) = 0:
+      name: 'GDP_IS_ACTIVE is required by the STTM.'
+  - freshness(GDP_IS_ACTIVE):
+      name: 'GDP_IS_ACTIVE should be fresher than one day.'
+      warn: when > 1d
+  - missing_count(GDP_UPDATED_BY) = 0:
+      name: 'GDP_UPDATED_BY is required by the STTM.'
+  - freshness(GDP_UPDATED_BY):
+      name: 'GDP_UPDATED_BY should be fresher than one day.'
+      warn: when > 1d
+  - missing_count(GDP_UPDATED_TS) = 0:
+      name: 'GDP_UPDATED_TS is required by the STTM.'
+  - freshness(GDP_UPDATED_TS):
+      name: 'GDP_UPDATED_TS should be fresher than one day.'
+      warn: when > 1d
+  - missing_count(IS_PRIMARY_INDUSTRY):
+      name: 'IS_PRIMARY_INDUSTRY had no missing values in the profiled source.'
       warn: when > 0
-  - invalid_count(CATEGORY) = 0:
-      valid max length: 100
-      name: CATEGORY values must fit VARCHAR(100).
-  - invalid_count(CATEGORY):
-      valid values: ['Electronics', 'Furniture']
-      name: CATEGORY should stay within the 2 observed codes.
+  - missing_count(REF_INDUSTRY_NAME_SKEY):
+      name: 'REF_INDUSTRY_NAME_SKEY had no missing values in the profiled source.'
       warn: when > 0
-  - missing_count(CREATED_DATE):
-      name: CREATED_DATE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(CREATED_DATE) = 0:
-      valid max length: 50
-      name: CREATED_DATE values must fit VARCHAR(50).
-  - invalid_count(CREATED_DATE):
-      valid values: ['2023-01-01', '2023-03-01', '2023-02-15', '2023-04-10', '2023-05-20', '2023-06-01', '2023-07-15', '2023-08-01']
-      name: CREATED_DATE should stay within the 8 observed codes.
-      warn: when > 0
-  - missing_count(CUSTOMER_ID):
-      name: CUSTOMER_ID had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(CUSTOMER_ID):
+  - invalid_count(REF_INDUSTRY_NAME_SKEY):
       valid min: 0
-      name: CUSTOMER_ID should not be negative.
+      name: 'REF_INDUSTRY_NAME_SKEY should not be negative.'
       warn: when > 0
-  - invalid_count(CUSTOMER_ID):
-      valid values: ['1001', '1002', '1006', '1003', '1004', '1005', '1007', '1008']
-      name: CUSTOMER_ID should stay within the 8 observed codes.
-      warn: when > 0
-  - missing_count(DISCOUNT_PCT):
-      name: DISCOUNT_PCT had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(DISCOUNT_PCT):
-      valid min: 0
-      name: DISCOUNT_PCT should not be negative.
-      warn: when > 0
-  - invalid_count(DISCOUNT_PCT):
-      valid values: ['0.00', '5.00', '10.00', '3.00', '8.00']
-      name: DISCOUNT_PCT should stay within the 5 observed codes.
-      warn: when > 0
-  - missing_count(EVENT_DATA):
-      name: EVENT_DATA had no missing values in the profiled source.
-      warn: when > 0
-  - missing_count(EVENT_TYPE):
-      name: EVENT_TYPE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(EVENT_TYPE) = 0:
-      valid max length: 100
-      name: EVENT_TYPE values must fit VARCHAR(100).
-  - invalid_count(EVENT_TYPE):
-      valid values: ['CLICKSTREAM', 'IOT', 'TRANSACTION']
-      name: EVENT_TYPE should stay within the 3 observed codes.
-      warn: when > 0
-  - missing_count(IS_ACTIVE):
-      name: IS_ACTIVE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(IS_ACTIVE) = 0:
-      valid max length: 10
-      name: IS_ACTIVE values must fit VARCHAR(10).
-  - invalid_count(IS_ACTIVE):
-      valid values: ['Y', 'N']
-      name: IS_ACTIVE should stay within the 2 observed codes.
-      warn: when > 0
-  - missing_count(LOAD_TIMESTAMP):
-      name: LOAD_TIMESTAMP had no missing values in the profiled source.
-      warn: when > 0
-  - missing_count(METADATA_FILENAME):
-      name: METADATA_FILENAME had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(METADATA_FILENAME) = 0:
-      valid max length: 500
-      name: METADATA_FILENAME values must fit VARCHAR(500).
-  - missing_count(METADATA_ROW_NUMBER):
-      name: METADATA_ROW_NUMBER had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(METADATA_ROW_NUMBER):
-      valid min: 0
-      name: METADATA_ROW_NUMBER should not be negative.
-      warn: when > 0
-  - missing_count(ORDER_DATE):
-      name: ORDER_DATE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(ORDER_DATE) = 0:
-      valid max length: 50
-      name: ORDER_DATE values must fit VARCHAR(50).
-  - invalid_percent(ORDER_DATE):
-      valid regex: '^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$'
-      name: ORDER_DATE should keep the shape 9999-99-99.
+  - invalid_percent(SOURCE_UNIQUE_ID):
+      valid regex: '^[A-Z]{2}[0-9]{6}$'
+      name: 'SOURCE_UNIQUE_ID should keep the shape AA999999.'
       warn: when > 5%
-  - missing_count(ORDER_ID):
-      name: ORDER_ID had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(ORDER_ID):
-      valid min: 0
-      name: ORDER_ID should not be negative.
-      warn: when > 0
-  - missing_count(ORDER_ITEM_ID):
-      name: ORDER_ITEM_ID had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(ORDER_ITEM_ID):
-      valid min: 0
-      name: ORDER_ITEM_ID should not be negative.
-      warn: when > 0
-  - missing_count(ORDER_STATUS):
-      name: ORDER_STATUS had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(ORDER_STATUS) = 0:
-      valid max length: 20
-      name: ORDER_STATUS values must fit VARCHAR(20).
-  - invalid_count(ORDER_STATUS):
-      valid values: ['COMPLETED', 'SHIPPED', 'CANCELLED', 'PROCESSING']
-      name: ORDER_STATUS should stay within the 4 observed codes.
-      warn: when > 0
-  - missing_count(PAYMENT_METHOD):
-      name: PAYMENT_METHOD had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(PAYMENT_METHOD) = 0:
-      valid max length: 50
-      name: PAYMENT_METHOD values must fit VARCHAR(50).
-  - invalid_count(PAYMENT_METHOD):
-      valid values: ['Credit Card', 'PayPal', 'Debit Card']
-      name: PAYMENT_METHOD should stay within the 3 observed codes.
-      warn: when > 0
-  - missing_count(PRODUCT_ID):
-      name: PRODUCT_ID had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(PRODUCT_ID):
-      valid min: 0
-      name: PRODUCT_ID should not be negative.
-      warn: when > 0
-  - invalid_count(PRODUCT_ID):
-      valid values: ['2001', '2002', '2004', '2005', '2006', '2007', '2010', '2003', '2009']
-      name: PRODUCT_ID should stay within the 9 observed codes.
-      warn: when > 0
-  - missing_count(PRODUCT_NAME):
-      name: PRODUCT_NAME had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(PRODUCT_NAME) = 0:
-      valid max length: 200
-      name: PRODUCT_NAME values must fit VARCHAR(200).
-  - missing_count(QUANTITY):
-      name: QUANTITY had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(QUANTITY):
-      valid min: 0
-      name: QUANTITY should not be negative.
-      warn: when > 0
-  - invalid_count(QUANTITY):
-      valid values: ['1', '2', '3']
-      name: QUANTITY should stay within the 3 observed codes.
-      warn: when > 0
-  - missing_count(RAW_DATA):
-      name: RAW_DATA had no missing values in the profiled source.
-      warn: when > 0
-  - missing_count(RECEIVED_AT):
-      name: RECEIVED_AT had no missing values in the profiled source.
-      warn: when > 0
-  - missing_count(SHIPPING_ADDRESS):
-      name: SHIPPING_ADDRESS had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(SHIPPING_ADDRESS) = 0:
-      valid max length: 500
-      name: SHIPPING_ADDRESS values must fit VARCHAR(500).
-  - invalid_count(SHIPPING_ADDRESS):
-      valid values: ['123 Main St, New York, NY 10001', '456 Oak Ave, Los Angeles, CA 90001', '987 Cedar Ln, Seattle, WA 98101', '111 Birch Way, Denver, CO 80201', '222 Spruce Ct, Boston, MA 02101', '321 Elm St, Houston, TX 77001', '654 Maple Dr, Phoenix, AZ 85001', '789 Pine Rd, Chicago, IL 60601']
-      name: SHIPPING_ADDRESS should stay within the 8 observed codes.
-      warn: when > 0
-  - missing_count(SOURCE_FILE):
-      name: SOURCE_FILE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(SOURCE_FILE) = 0:
-      valid max length: 500
-      name: SOURCE_FILE values must fit VARCHAR(500).
-  - missing_count(SOURCE_SYSTEM):
-      name: SOURCE_SYSTEM had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(SOURCE_SYSTEM) = 0:
-      valid max length: 50
-      name: SOURCE_SYSTEM values must fit VARCHAR(50).
-  - invalid_count(SOURCE_SYSTEM):
-      valid values: ['ERP', 'WEB', 'MOBILE']
-      name: SOURCE_SYSTEM should stay within the 3 observed codes.
-      warn: when > 0
-  - missing_count(SUB_CATEGORY):
-      name: SUB_CATEGORY had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(SUB_CATEGORY) = 0:
-      valid max length: 100
-      name: SUB_CATEGORY values must fit VARCHAR(100).
-  - invalid_count(SUB_CATEGORY):
-      valid values: ['Accessories', 'Audio', 'Chairs', 'Computers', 'Desks', 'Displays']
-      name: SUB_CATEGORY should stay within the 6 observed codes.
-      warn: when > 0
-  - missing_count(SUPPLIER_ID):
-      name: SUPPLIER_ID had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(SUPPLIER_ID):
-      valid min: 0
-      name: SUPPLIER_ID should not be negative.
-      warn: when > 0
-  - invalid_count(SUPPLIER_ID):
-      valid values: ['302', '301', '303', '304', '305']
-      name: SUPPLIER_ID should stay within the 5 observed codes.
-      warn: when > 0
-  - missing_count(TOTAL_AMOUNT):
-      name: TOTAL_AMOUNT had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(TOTAL_AMOUNT) = 0:
-      valid max length: 50
-      name: TOTAL_AMOUNT values must fit VARCHAR(50).
-  - missing_count(UNIT_PRICE):
-      name: UNIT_PRICE had no missing values in the profiled source.
-      warn: when > 0
-  - invalid_count(UNIT_PRICE):
-      valid min: 0
-      name: UNIT_PRICE should not be negative.
-      warn: when > 0
-  - invalid_count(UNIT_PRICE):
-      valid values: ['1299.99', '249.99', '29.99', '399.99', '449.99', '599.99', '89.99', '39.99', '49.99']
-      name: UNIT_PRICE should stay within the 9 observed codes.
-      warn: when > 0
+  - values in (COMPANY_CORE_SKEY) must exist in company_core (COMPANY_CORE_SKEY):
+      name: 'Every COMPANY_CORE_SKEY must resolve to a COMPANY_CORE row.'
