@@ -1,333 +1,218 @@
 {
   "engine": "dbt-onboard-source/engine-v1",
-  "skill": null,
-  "standard": "GENERIC",
+  "skill": "GDP-DBT-ONBOARD-SOURCE",
+  "standard": "GDP",
   "contract": {
-    "applied": false,
-    "role": null,
-    "hkey_from_contract": false,
+    "applied": true,
+    "role": "spoke",
+    "hkey_from_contract": true,
     "lookups": [],
-    "hub_fk": false,
-    "casts": []
-  },
-  "convention": "sources -> staging view -> snapshot (SCD2) -> current-rows view",
-  "domain": "company",
-  "target": "dim_customers",
-  "source_key": "raw",
-  "prefix": "",
-  "source_system": "RAW",
-  "primary_source": "RAW_ORDERS",
-  "joins": [
-    {
-      "table": "RAW_ORDER_ITEMS",
-      "alias": "j1",
-      "on": "o.ORDER_ID = j1.ORDER_ID",
-      "cardinality": "1:N",
-      "join_type": "left"
-    },
-    {
-      "table": "RAW_PRODUCTS",
-      "alias": "j2",
-      "on": "j1.PRODUCT_ID = j2.PRODUCT_ID",
-      "cardinality": "N:1",
-      "join_type": "left"
-    },
-    {
-      "table": "RAW_WEBSITE_EVENTS",
-      "alias": "j3",
-      "on": "j1.QUANTITY = j3.METADATA_ROW_NUMBER",
-      "cardinality": "N:1",
-      "join_type": "left"
-    }
-  ],
-  "source_unique_id": {
-    "expression": "upper(trim(o.ORDER_ID::varchar))",
-    "reason": "profiled as unique: ORDER_ID (confirm business keys in the STTM)",
-    "columns": [
-      "ORDER_ID"
+    "hub_fk": true,
+    "casts": [
+      "ACCOUNT_NUMBER",
+      "RELATIONSHIP_START_DATE"
     ]
   },
-  "dedup_order": "source_unique_id",
-  "hub": "created SCD2 snapshot dim_customers_snapshot (check strategy on all columns) and a current-rows view",
+  "convention": "bronze -> ephemeral silver staging -> silver hub (SCD1)",
+  "domain": "company",
+  "target": "company_relationship",
+  "source_key": "zoominfo_dev",
+  "prefix": "GDP",
+  "source_system": "ZOOMINFO_DEV",
+  "primary_source": "SILVER_ZOOMINFO_COMPANY",
+  "joins": [],
+  "source_unique_id": {
+    "expression": "upper(trim(o.ZOOMINFO_ID))",
+    "reason": "STTM business keys",
+    "columns": [
+      "SOURCE_UNIQUE_ID"
+    ]
+  },
+  "dedup_order": "o.GDP_UPDATED_TS desc",
+  "hub": "created minimal SCD1 hub (no hub model on the cut-from branch)",
   "macros_added": [
-    "generate_sha2_hash_key",
-    "m_is_source_active",
-    "m_dim_customers_hkey"
+    "m_get_source_system_skey_company",
+    "m_company_relationship_hkey"
   ],
   "columns": [
     {
-      "target_column": "RAW_DATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.RAW_DATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
+      "target_column": "COMPANY_RELATIONSHIP_SKEY",
+      "class": "SEQUENCE",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(38,0)",
       "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
+      "note": "assigned from sequence SEQ_COMPANY_RELATIONSHIP_SKEY (silver-model convention)"
     },
     {
-      "target_column": "SOURCE_FILE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.SOURCE_FILE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
+      "target_column": "SOURCE_UNIQUE_ID",
+      "class": "COMPOUND_PK",
+      "source": "SILVER_ZOOMINFO_COMPANY.ZOOMINFO_ID",
+      "source_type": "VARCHAR(16777216)",
+      "target_type": "TEXT",
       "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
+      "note": "STTM business keys"
     },
     {
-      "target_column": "LOAD_TIMESTAMP",
+      "target_column": "REF_GDP_SOURCE_SYSTEM_SKEY",
+      "class": "SOURCE_SYSTEM_REF",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(38,0)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "COMPANY_CORE_SKEY",
+      "class": "HUB_FK",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(38,0)",
+      "cast": null,
+      "note": "resolved from ref('company_core') by SOURCE_UNIQUE_ID (latest active row)"
+    },
+    {
+      "target_column": "REF_RELATIONSHIP_TYPE_SKEY",
+      "class": "FK_LOOKUP",
+      "source": "SILVER_ZOOMINFO_COMPANY.BRONZE_KEY",
+      "source_type": "NUMBER(38,0)",
+      "target_type": "NUMBER(38,0)",
+      "cast": null,
+      "note": "FK lookup pending: add ref CTE + LEFT JOIN on upper(trim(...)) for REF_RELATIONSHIP_TYPE_SKEY"
+    },
+    {
+      "target_column": "ACCOUNT_NAME",
       "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.LOAD_TIMESTAMP",
+      "source": "COMPANY.CLIENT_NAME",
+      "source_type": "VARCHAR(16777216)",
+      "target_type": "TEXT",
+      "cast": null,
+      "note": "no join path to COMPANY"
+    },
+    {
+      "target_column": "ACCOUNT_NUMBER",
+      "class": "PASSTHROUGH",
+      "source": "SILVER_ZOOMINFO_COMPANY.EMPLOYEE_COUNT",
+      "source_type": "NUMBER(38,0)",
+      "target_type": "NUMBER(38,0)",
+      "cast": "contract cast try_to_number(o.col)",
+      "note": ""
+    },
+    {
+      "target_column": "ACCOUNT_STATUS",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_ACCOUNT_ID",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "RELATIONSHIP_START_DATE",
+      "class": "PASSTHROUGH",
+      "source": "SILVER_ZOOMINFO_COMPANY.LOAD_TIMESTAMP",
+      "source_type": "TIMESTAMP_NTZ",
+      "target_type": "TIMESTAMP_NTZ",
+      "cast": "contract cast o.col::timestamp_ntz",
+      "note": ""
+    },
+    {
+      "target_column": "RELATIONSHIP_END_DATE",
+      "class": "PASSTHROUGH",
+      "source": "SILVER_ZOOMINFO_COMPANY.GDP_UPDATED_TS",
       "source_type": "TIMESTAMP_NTZ",
       "target_type": "TIMESTAMP_NTZ",
       "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
+      "note": ""
     },
     {
-      "target_column": "RECORD_METADATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.RECORD_METADATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
-      "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
-    },
-    {
-      "target_column": "EVENT_DATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.EVENT_DATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "EVENT_TYPE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.EVENT_TYPE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "RECEIVED_AT",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.RECEIVED_AT",
-      "source_type": "TIMESTAMP_NTZ",
-      "target_type": "TIMESTAMP_NTZ",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "ORDER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "COMPANY_RELATIONSHIP_HKEY",
+      "class": "HKEY",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "CUSTOMER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.CUSTOMER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "ORDER_DATE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_DATE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "ORDER_STATUS",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_STATUS",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(20)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "TOTAL_AMOUNT",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.TOTAL_AMOUNT",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "SHIPPING_ADDRESS",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.SHIPPING_ADDRESS",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "PAYMENT_METHOD",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.PAYMENT_METHOD",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "SOURCE_SYSTEM",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.SOURCE_SYSTEM",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "ORDER_ITEM_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.ORDER_ITEM_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "PRODUCT_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.PRODUCT_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "QUANTITY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.QUANTITY",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "UNIT_PRICE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.UNIT_PRICE",
-      "source_type": "NUMBER(10,2)",
-      "target_type": "NUMBER(10,2)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "DISCOUNT_PCT",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.DISCOUNT_PCT",
-      "source_type": "NUMBER(5,2)",
-      "target_type": "NUMBER(5,2)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "PRODUCT_NAME",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.PRODUCT_NAME",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(200)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "CATEGORY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.CATEGORY",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "SUB_CATEGORY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.SUB_CATEGORY",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "SUPPLIER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.SUPPLIER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
-      "cast": null,
-      "note": ""
-    },
-    {
-      "target_column": "IS_ACTIVE",
+      "target_column": "GDP_IS_ACTIVE",
       "class": "AUDIT",
-      "source": "RAW_PRODUCTS.IS_ACTIVE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(10)",
+      "source": null,
+      "source_type": null,
+      "target_type": "BOOLEAN",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "CREATED_DATE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.CREATED_DATE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "GDP_INSERTED_TS",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TIMESTAMP_NTZ(6)",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "METADATA_FILENAME",
-      "class": "PASSTHROUGH",
-      "source": "RAW_WEBSITE_EVENTS.METADATA_FILENAME",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
+      "target_column": "GDP_INSERTED_BY",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "METADATA_ROW_NUMBER",
-      "class": "PASSTHROUGH",
-      "source": "RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "GDP_UPDATED_TS",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TIMESTAMP_NTZ(6)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GDP_UPDATED_BY",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     }
   ],
   "counts": {
-    "AUDIT": 1,
-    "PASSTHROUGH": 27
+    "AUDIT": 5,
+    "COMPOUND_PK": 1,
+    "FK_LOOKUP": 1,
+    "HKEY": 1,
+    "HUB_FK": 1,
+    "PASSTHROUGH": 4,
+    "SEQUENCE": 1,
+    "SOURCE_SYSTEM_REF": 1,
+    "UNMAPPED": 2
   },
-  "casts": 0,
-  "todos": 7,
+  "casts": 2,
+  "todos": 2,
   "anomalies": [
-    "no join path from RAW_ORDERS to RAW_CUSTOMERS; its columns load as null with a TODO",
-    "no join path from RAW_ORDERS to RAW_EVENTS; its columns load as null with a TODO",
-    "RAW_ORDERS has no update timestamp; dedup orders by source_unique_id and audit timestamps use current_timestamp()",
-    "1:N join to RAW_ORDER_ITEMS: the dedup keeps one RAW_ORDER_ITEMS row per key"
+    "no join path from SILVER_ZOOMINFO_COMPANY to COMPANY; its columns load as null with a TODO"
   ],
   "files": {
-    "models/sources/dim_customers_raw_source.yml": "new",
-    "models/company/raw/raw_dim_customers.sql": "new",
-    "models/company/dim_customers.sql": "new",
-    "models/company/_dim_customers.yml": "new",
-    "macros/company_utils.sql": "new",
-    "dbt_project.yml": "new",
-    "snapshots/dim_customers_snapshot.sql": "new"
+    "models/bronze/company_relationship_zoominfo_dev_source.yml": "new",
+    "models/silver/company/zoominfo_dev/zoominfo_dev_company_relationship.sql": "new",
+    "models/silver/company/company_relationship.sql": "new",
+    "models/silver/company/_company_relationship.yml": "new",
+    "macros/company_utils.sql": "patched",
+    "dbt_project.yml": "patched",
+    "release/watermark_company_relationship.sql": "new"
   },
   "rules": [
     "Rule 1: NULLIF(TRIM()) on text, passthrough for number/date, dedup qualify, not-null/blank key filter",
@@ -335,6 +220,6 @@
     "Rule 3: HKEY over business columns only (no *_SKEY, SOURCE_UNIQUE_ID, audit)",
     "Rule 4: LEFT JOINs only; compound keys with '||' and coalesce(..., '')"
   ],
-  "sttm_id": "2675d4d8-5b9c-43e4-82a1-9da848c7dbf4",
-  "skeleton_files": 0
+  "sttm_id": "a8339407-7eb1-431b-88a2-3e0d12456b5d",
+  "skeleton_files": 11
 }

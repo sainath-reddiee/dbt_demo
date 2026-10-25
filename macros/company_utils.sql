@@ -37,3 +37,22 @@
     'metadata_row_number'
 ]) }}
 {%- endmacro %}
+
+{% macro m_get_source_system_skey_company(source_system_name) -%}
+    select distinct GDP_SOURCE_SYSTEM_SKEY as gdp_source_system_skey
+    from {{ source('company_shared_reference', 'ref_gdp_source_system') }}
+    where upper(GDP_SOURCE_SYSTEM_NAME) = '{{ source_system_name | upper }}'
+{%- endmacro %}
+
+-- HKEY for company_relationship: pure business columns in DDL order (no *_SKEY, SOURCE_UNIQUE_ID or audit).
+{% macro m_company_relationship_hkey() -%}
+{{ generate_sha2_hash_key([
+    'ref_relationship_type_skey',
+    'account_name',
+    'account_number',
+    'account_status',
+    'source_account_id',
+    'relationship_start_date',
+    'relationship_end_date'
+]) }}
+{%- endmacro %}
