@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: company_segment
+    description: "one row per SOURCE_UNIQUE_ID per REF_GDP_SOURCE_SYSTEM_SKEY"
+    columns:
+      - name: source_unique_id
+        description: "STTM business keys"
+        tests:
+          - not_null
+          - unique
+      - name: company_segment_skey
+        description: "sequence"
+        tests:
+          - not_null
+      - name: ref_gdp_source_system_skey
+        description: "Ref Gdp Source System Skey"
+        tests:
+          - not_null
+      - name: company_core_skey
+        description: "FK"
+      - name: ref_segment_skey
+        description: "Ref Segment Skey"
+      - name: ref_service_line_skey
+        description: "Ref Service Line Skey"
+      - name: valid_from
+        description: "Valid From"
+      - name: valid_to
+        description: "Valid To"
+      - name: company_segment_hkey
+        description: "Company Segment Hkey"
+        tests:
+          - not_null
+      - name: source_segment_name
+        description: "Source Segment Name"
+      - name: source_service_line_name
+        description: "Source Service Line Name"
+      - name: gdp_is_active
+        description: "Gdp Is Active"
+        tests:
+          - not_null
+      - name: gdp_inserted_ts
+        description: "Gdp Inserted Ts"
+        tests:
+          - not_null
+      - name: gdp_inserted_by
+        description: "Gdp Inserted By"
+        tests:
+          - not_null
+      - name: gdp_updated_ts
+        description: "Gdp Updated Ts"
+        tests:
+          - not_null
+      - name: gdp_updated_by
+        description: "Gdp Updated By"
+        tests:
+          - not_null
