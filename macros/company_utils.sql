@@ -37,3 +37,21 @@
     'metadata_row_number'
 ]) }}
 {%- endmacro %}
+
+{% macro m_get_source_system_skey_company(source_system_name) -%}
+    select distinct GDP_SOURCE_SYSTEM_SKEY as gdp_source_system_skey
+    from {{ source('company_shared_reference', 'ref_gdp_source_system') }}
+    where upper(GDP_SOURCE_SYSTEM_NAME) = '{{ source_system_name | upper }}'
+{%- endmacro %}
+
+-- HKEY for company_segment: pure business columns in DDL order (no *_SKEY, SOURCE_UNIQUE_ID or audit).
+{% macro m_company_segment_hkey() -%}
+{{ generate_sha2_hash_key([
+    'ref_segment_skey',
+    'ref_service_line_skey',
+    'source_segment_name',
+    'source_service_line_name',
+    'valid_from',
+    'valid_to'
+]) }}
+{%- endmacro %}
