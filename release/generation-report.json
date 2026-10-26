@@ -1,333 +1,611 @@
 {
   "engine": "dbt-onboard-source/engine-v1",
-  "skill": null,
-  "standard": "GENERIC",
+  "skill": "GDP-DBT-ONBOARD-SOURCE",
+  "standard": "GDP",
   "contract": {
-    "applied": false,
-    "role": null,
-    "hkey_from_contract": false,
+    "applied": true,
+    "role": "spoke",
+    "hkey_from_contract": true,
     "lookups": [],
-    "hub_fk": false,
+    "hub_fk": true,
     "casts": []
   },
-  "convention": "sources -> staging view -> snapshot (SCD2) -> current-rows view",
-  "domain": "company",
-  "target": "dim_customers",
-  "source_key": "raw",
-  "prefix": "",
-  "source_system": "RAW",
-  "primary_source": "RAW_ORDERS",
-  "joins": [
-    {
-      "table": "RAW_ORDER_ITEMS",
-      "alias": "j1",
-      "on": "o.ORDER_ID = j1.ORDER_ID",
-      "cardinality": "1:N",
-      "join_type": "left"
-    },
-    {
-      "table": "RAW_PRODUCTS",
-      "alias": "j2",
-      "on": "j1.PRODUCT_ID = j2.PRODUCT_ID",
-      "cardinality": "N:1",
-      "join_type": "left"
-    },
-    {
-      "table": "RAW_WEBSITE_EVENTS",
-      "alias": "j3",
-      "on": "j1.QUANTITY = j3.METADATA_ROW_NUMBER",
-      "cardinality": "N:1",
-      "join_type": "left"
-    }
-  ],
+  "convention": "bronze -> ephemeral silver staging -> silver hub (SCD1)",
+  "domain": "property",
+  "target": "property_address",
+  "source_key": "lightbox",
+  "prefix": "GDP",
+  "source_system": "LIGHTBOX",
+  "primary_source": "ASSESSMENT",
+  "joins": [],
   "source_unique_id": {
-    "expression": "upper(trim(o.ORDER_ID::varchar))",
-    "reason": "profiled as unique: ORDER_ID (confirm business keys in the STTM)",
+    "expression": "upper(trim(o.ASSESSMENT_LID))",
+    "reason": "STTM business keys",
     "columns": [
-      "ORDER_ID"
+      "SOURCE_UNIQUE_ID"
     ]
   },
   "dedup_order": "source_unique_id",
-  "hub": "created SCD2 snapshot dim_customers_snapshot (check strategy on all columns) and a current-rows view",
+  "hub": "created minimal SCD1 hub (no hub model on the cut-from branch)",
   "macros_added": [
-    "generate_sha2_hash_key",
-    "m_is_source_active",
-    "m_dim_customers_hkey"
+    "m_get_source_system_skey_property",
+    "m_property_address_hkey"
   ],
   "columns": [
     {
-      "target_column": "RAW_DATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.RAW_DATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
+      "target_column": "PROPERTY_ADDRESS_SKEY",
+      "class": "SEQUENCE",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(19,0)",
       "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
+      "note": "assigned from sequence SEQ_PROPERTY_ADDRESS_SKEY (silver-model convention)"
     },
     {
-      "target_column": "SOURCE_FILE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.SOURCE_FILE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
+      "target_column": "SOURCE_UNIQUE_ID",
+      "class": "COMPOUND_PK",
+      "source": "ASSESSMENT.ASSESSMENT_LID",
+      "source_type": "VARCHAR(134217728)",
+      "target_type": "TEXT",
       "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
+      "note": "STTM business keys"
     },
     {
-      "target_column": "LOAD_TIMESTAMP",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.LOAD_TIMESTAMP",
-      "source_type": "TIMESTAMP_NTZ",
-      "target_type": "TIMESTAMP_NTZ",
-      "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
-    },
-    {
-      "target_column": "RECORD_METADATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_CUSTOMERS.RECORD_METADATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
-      "cast": null,
-      "note": "no join path to RAW_CUSTOMERS"
-    },
-    {
-      "target_column": "EVENT_DATA",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.EVENT_DATA",
-      "source_type": "VARIANT",
-      "target_type": "VARIANT",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "EVENT_TYPE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.EVENT_TYPE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "RECEIVED_AT",
-      "class": "PASSTHROUGH",
-      "source": "RAW_EVENTS.RECEIVED_AT",
-      "source_type": "TIMESTAMP_NTZ",
-      "target_type": "TIMESTAMP_NTZ",
-      "cast": null,
-      "note": "no join path to RAW_EVENTS"
-    },
-    {
-      "target_column": "ORDER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "REF_GDP_SOURCE_SYSTEM_SKEY",
+      "class": "SOURCE_SYSTEM_REF",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(19,0)",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "CUSTOMER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.CUSTOMER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "PROPERTY_CORE_SKEY",
+      "class": "HUB_FK",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(19,0)",
+      "cast": null,
+      "note": "resolved from ref('property_core') by SOURCE_UNIQUE_ID (latest active row)"
+    },
+    {
+      "target_column": "REF_ADDRESS_TYPE_SKEY",
+      "class": "FK_LOOKUP",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(19,0)",
+      "cast": null,
+      "note": "FK lookup pending: add ref CTE + LEFT JOIN on upper(trim(...)) for REF_ADDRESS_TYPE_SKEY"
+    },
+    {
+      "target_column": "ADDRESS_LINE_1",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "ORDER_DATE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_DATE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "ADDRESS_LINE_2",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "ORDER_STATUS",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.ORDER_STATUS",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(20)",
+      "target_column": "STREET_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "TOTAL_AMOUNT",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.TOTAL_AMOUNT",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "STREET_NUMBER_1",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "SHIPPING_ADDRESS",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.SHIPPING_ADDRESS",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
+      "target_column": "STREET_NUMBER_2",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "PAYMENT_METHOD",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.PAYMENT_METHOD",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "PRE_STREET_DIRECTION_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "SOURCE_SYSTEM",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDERS.SOURCE_SYSTEM",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "STREET_TYPE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "ORDER_ITEM_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.ORDER_ITEM_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "POST_STREET_DIRECTION_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "PRODUCT_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.PRODUCT_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "CITY",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "QUANTITY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.QUANTITY",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "STATE_PROVINCE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "UNIT_PRICE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.UNIT_PRICE",
-      "source_type": "NUMBER(10,2)",
-      "target_type": "NUMBER(10,2)",
+      "target_column": "COUNTRY",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "DISCOUNT_PCT",
+      "target_column": "COUNTY",
       "class": "PASSTHROUGH",
-      "source": "RAW_ORDER_ITEMS.DISCOUNT_PCT",
-      "source_type": "NUMBER(5,2)",
-      "target_type": "NUMBER(5,2)",
+      "source": "ASSESSMENT.COUNTY",
+      "source_type": "VARCHAR(134217728)",
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "PRODUCT_NAME",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.PRODUCT_NAME",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(200)",
+      "target_column": "POSTAL_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "CATEGORY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.CATEGORY",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
+      "target_column": "STATE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "SUB_CATEGORY",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.SUB_CATEGORY",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(100)",
+      "target_column": "POSTAL_CODE_EXTENSION",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "SUPPLIER_ID",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.SUPPLIER_ID",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "STREET_NUMBER_3",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "IS_ACTIVE",
+      "target_column": "LATITUDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "LONGITUDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_ADDRESS_LINE_1",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_ADDRESS_LINE_2",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_1",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_2",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_PRE_STREET_DIRECTION_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_TYPE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_POST_STREET_DIRECTION_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_CITY",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_COUNTY",
+      "class": "PASSTHROUGH",
+      "source": "ASSESSMENT.FIPS_CODE",
+      "source_type": "VARCHAR(134217728)",
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STATE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_POSTAL_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_POSTAL_CODE_EXTENSION",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_COUNTRY_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_3",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_GEOCODE_OUTPUT",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(10,0)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_LATITUDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_LONGITUDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_LATITUDE_OVERRIDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_LONGITUDE_OVERRIDE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(18,15)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_GEOCODE_OVERRIDE_SOURCE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(10,0)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "ADDRESS_MATCH_SCORE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(38,2)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "ADDRESS_MATCH_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GEOCODE_OUTPUT",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "NUMBER(10,0)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "ADDRESS_PRECISION_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GEOCODE_PROVIDER_NAME",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GEOMETRY",
+      "class": "PASSTHROUGH",
+      "source": "ASSESSMENT.GEOMETRY",
+      "source_type": "VARCHAR(134217728)",
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "PROPERTY_ADDRESS_HKEY",
+      "class": "HKEY",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GDP_IS_ACTIVE",
       "class": "AUDIT",
-      "source": "RAW_PRODUCTS.IS_ACTIVE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(10)",
+      "source": null,
+      "source_type": null,
+      "target_type": "BOOLEAN",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "CREATED_DATE",
-      "class": "PASSTHROUGH",
-      "source": "RAW_PRODUCTS.CREATED_DATE",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(50)",
+      "target_column": "GDP_INSERTED_TS",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TIMESTAMP_NTZ(6)",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "METADATA_FILENAME",
-      "class": "PASSTHROUGH",
-      "source": "RAW_WEBSITE_EVENTS.METADATA_FILENAME",
-      "source_type": "TEXT",
-      "target_type": "VARCHAR(500)",
+      "target_column": "GDP_INSERTED_BY",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     },
     {
-      "target_column": "METADATA_ROW_NUMBER",
-      "class": "PASSTHROUGH",
-      "source": "RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER",
-      "source_type": "NUMBER(38,0)",
-      "target_type": "NUMBER(38,0)",
+      "target_column": "GDP_UPDATED_TS",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TIMESTAMP_NTZ(6)",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "GDP_UPDATED_BY",
+      "class": "AUDIT",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "SOURCE_STREET_NAME_PRE_TYPE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "STREET_NAME_PRE_TYPE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "COUNTRY_ISO2_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "COUNTRY_ISO3_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
+      "cast": null,
+      "note": ""
+    },
+    {
+      "target_column": "STATE_ISO_CODE",
+      "class": "UNMAPPED",
+      "source": null,
+      "source_type": null,
+      "target_type": "TEXT",
       "cast": null,
       "note": ""
     }
   ],
   "counts": {
-    "AUDIT": 1,
-    "PASSTHROUGH": 27
+    "AUDIT": 5,
+    "COMPOUND_PK": 1,
+    "FK_LOOKUP": 1,
+    "HKEY": 1,
+    "HUB_FK": 1,
+    "PASSTHROUGH": 3,
+    "SEQUENCE": 1,
+    "SOURCE_SYSTEM_REF": 1,
+    "UNMAPPED": 47
   },
   "casts": 0,
-  "todos": 7,
+  "todos": 1,
   "anomalies": [
-    "no join path from RAW_ORDERS to RAW_CUSTOMERS; its columns load as null with a TODO",
-    "no join path from RAW_ORDERS to RAW_EVENTS; its columns load as null with a TODO",
-    "RAW_ORDERS has no update timestamp; dedup orders by source_unique_id and audit timestamps use current_timestamp()",
-    "1:N join to RAW_ORDER_ITEMS: the dedup keeps one RAW_ORDER_ITEMS row per key"
+    "ASSESSMENT has no update timestamp; dedup orders by source_unique_id and audit timestamps use current_timestamp()"
   ],
   "files": {
-    "models/sources/dim_customers_raw_source.yml": "new",
-    "models/company/raw/raw_dim_customers.sql": "new",
-    "models/company/dim_customers.sql": "new",
-    "models/company/_dim_customers.yml": "new",
-    "macros/company_utils.sql": "new",
-    "dbt_project.yml": "new",
-    "snapshots/dim_customers_snapshot.sql": "new"
+    "models/bronze/property_address_lightbox_source.yml": "new",
+    "models/silver/property/lightbox/lightbox_property_address.sql": "new",
+    "models/silver/property/property_address.sql": "new",
+    "models/silver/property/_property_address.yml": "new",
+    "macros/property_utils.sql": "new",
+    "dbt_project.yml": "patched",
+    "release/watermark_property_address.sql": "new"
   },
   "rules": [
     "Rule 1: NULLIF(TRIM()) on text, passthrough for number/date, dedup qualify, not-null/blank key filter",
@@ -335,6 +613,6 @@
     "Rule 3: HKEY over business columns only (no *_SKEY, SOURCE_UNIQUE_ID, audit)",
     "Rule 4: LEFT JOINs only; compound keys with '||' and coalesce(..., '')"
   ],
-  "sttm_id": "2675d4d8-5b9c-43e4-82a1-9da848c7dbf4",
-  "skeleton_files": 0
+  "sttm_id": "87778541-350d-42bf-9e60-f80f829f3396",
+  "skeleton_files": 11
 }
