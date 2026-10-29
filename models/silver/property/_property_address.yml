@@ -1,0 +1,143 @@
+version: 2
+
+models:
+  - name: property_address
+    description: "one row per SOURCE_UNIQUE_ID per REF_GDP_SOURCE_SYSTEM_SKEY"
+    columns:
+      - name: source_unique_id
+        description: "STTM business keys"
+        tests:
+          - not_null
+          - unique
+      - name: property_address_skey
+        description: "Surrogate key from sequence SEQ_PROPERTY_ADDRESS_SKEY.NEXTVAL; existing key preserved on update."
+        tests:
+          - not_null
+      - name: ref_gdp_source_system_skey
+        description: "FK to SHARED.REF_GDP_SOURCE_SYSTEM.GDP_SOURCE_SYSTEM_SKEY."
+      - name: property_core_skey
+        description: "FK to PROPERTY_CORE.PROPERTY_CORE_SKEY (hub)."
+        tests:
+          - not_null
+      - name: ref_address_type_skey
+        description: "FK to PROPERTY.REF_ADDRESS_TYPE (address type)."
+      - name: address_line_1
+        description: "Address Line 1."
+      - name: address_line_2
+        description: "Address Line 2."
+      - name: street_name
+        description: "Street Name."
+      - name: street_number_1
+        description: "Street Number 1."
+      - name: street_number_2
+        description: "Street Number 2."
+      - name: pre_street_direction_name
+        description: "Pre Street Direction Name."
+      - name: street_type
+        description: "Street Type."
+      - name: post_street_direction_name
+        description: "Post Street Direction Name."
+      - name: city
+        description: "City."
+      - name: state_province
+        description: "State Province. Emitted by the model and in the hkey, but not present in PROD_GDP_SILVER_DB.PROPERTY.PROPERTY_ADDRESS at time of capture (verify DDL)."
+      - name: country
+        description: "Country."
+      - name: county
+        description: "County."
+      - name: postal_code
+        description: "Postal Code."
+      - name: state
+        description: "State."
+      - name: postal_code_extension
+        description: "Postal Code Extension."
+      - name: street_number_3
+        description: "Street Number 3."
+      - name: latitude
+        description: "Geocoded latitude (ESRI post-hook may update)."
+      - name: longitude
+        description: "Geocoded longitude (ESRI post-hook may update)."
+      - name: source_address_line_1
+        description: "Source Address Line 1."
+      - name: source_address_line_2
+        description: "Source Address Line 2."
+      - name: source_street_name
+        description: "Source Street Name."
+      - name: source_street_number_1
+        description: "Source Street Number 1."
+      - name: source_street_number_2
+        description: "Source Street Number 2."
+      - name: source_pre_street_direction_name
+        description: "Source Pre Street Direction Name."
+      - name: source_street_type
+        description: "Source Street Type."
+      - name: source_post_street_direction_name
+        description: "Source Post Street Direction Name."
+      - name: source_city
+        description: "Source City."
+      - name: source_county
+        description: "Source County."
+      - name: source_state
+        description: "Source State."
+      - name: source_postal_code
+        description: "Source Postal Code."
+      - name: source_postal_code_extension
+        description: "Source Postal Code Extension."
+      - name: source_country_name
+        description: "Source Country Name."
+      - name: source_street_number_3
+        description: "Source Street Number 3."
+      - name: source_geocode_output
+        description: "Source Geocode Output."
+      - name: source_latitude
+        description: "Source Latitude."
+      - name: source_longitude
+        description: "Source Longitude."
+      - name: source_latitude_override
+        description: "Source Latitude Override."
+      - name: source_longitude_override
+        description: "Source Longitude Override."
+      - name: source_geocode_override_source
+        description: "Source Geocode Override Source."
+      - name: address_match_score
+        description: "Address Match Score."
+      - name: address_match_code
+        description: "Address Match Code."
+      - name: geocode_output
+        description: "Geocode Output."
+      - name: address_precision_code
+        description: "Address Precision Code."
+      - name: geocode_provider_name
+        description: "Geocode Provider Name."
+      - name: geometry
+        description: "Geometry."
+      - name: property_address_hkey
+        description: "SHA2 change-detection hash; row merges only when hash or GDP_IS_ACTIVE changes."
+        tests:
+          - not_null
+      - name: gdp_is_active
+        description: "Soft-delete flag; FALSE for hard-deleted (orphaned) source rows."
+      - name: gdp_inserted_ts
+        description: "Insert timestamp (excluded from MERGE update)."
+        tests:
+          - not_null
+      - name: gdp_inserted_by
+        description: "Inserting user (excluded from MERGE update)."
+        tests:
+          - not_null
+      - name: gdp_updated_ts
+        description: "Last update timestamp; drives Silver watermark."
+        tests:
+          - not_null
+      - name: gdp_updated_by
+        description: "Last updating user."
+      - name: source_street_name_pre_type
+        description: "Source Street Name Pre Type; NULL for EDP, LIGHTBOX, MTA and DIQ."
+      - name: street_name_pre_type
+        description: "Street Name Pre Type; NULL for EDP, LIGHTBOX, MTA and DIQ."
+      - name: country_iso2_code
+        description: "Populated by LIGHTBOX only; NULL for other sources."
+      - name: country_iso3_code
+        description: "Populated by LIGHTBOX only; NULL for other sources."
+      - name: state_iso_code
+        description: "Populated by LIGHTBOX only; NULL for other sources."
