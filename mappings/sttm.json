@@ -1,340 +1,639 @@
 {
-  "sttm_id": "2675d4d8-5b9c-43e4-82a1-9da848c7dbf4",
+  "sttm_id": "92f6a18a-ab1e-482a-b8d6-787d73e9d9cb",
   "table_design": {
-    "business_keys": [],
-    "dedup": "one row per source object",
-    "driving_table": "RAW_ORDERS",
-    "grain": "One row per business key of DIM_CUSTOMERS, snapshotted from the existing table.",
+    "business_keys": [
+      "SOURCE_UNIQUE_ID",
+      "REF_GDP_SOURCE_SYSTEM_SKEY"
+    ],
+    "dedup": "keep the latest row per SOURCE_UNIQUE_ID, REF_GDP_SOURCE_SYSTEM_SKEY",
+    "driving_table": "ADDRESS",
+    "grain": "one row per SOURCE_UNIQUE_ID per REF_GDP_SOURCE_SYSTEM_SKEY",
     "incremental_strategy": "merge",
     "join_graph": {
       "ambiguities": [],
-      "driving_table": "RAW_ORDERS",
-      "edited": true,
-      "joins": [
-        {
-          "alternatives": [],
-          "cardinality": "1:N",
-          "condition": "RAW_ORDERS.ORDER_ID = RAW_ORDER_ITEMS.ORDER_ID",
-          "confidence": 1,
-          "fan_out": true,
-          "join_type": "LEFT",
-          "keys": [
-            "ORDER_ID=ORDER_ID"
-          ],
-          "left_table": "RAW_ORDERS",
-          "reasoning": "set by reviewer",
-          "right_table": "RAW_ORDER_ITEMS",
-          "source": "manual",
-          "status": "CONFIRMED"
-        },
-        {
-          "alternatives": [],
-          "cardinality": "N:1",
-          "condition": "RAW_ORDER_ITEMS.PRODUCT_ID = RAW_PRODUCTS.PRODUCT_ID",
-          "confidence": 1,
-          "fan_out": false,
-          "join_type": "LEFT",
-          "keys": [
-            "PRODUCT_ID"
-          ],
-          "left_table": "RAW_ORDER_ITEMS",
-          "reasoning": "set by reviewer",
-          "right_table": "RAW_PRODUCTS",
-          "source": "manual",
-          "status": "CONFIRMED"
-        },
-        {
-          "alternatives": [],
-          "cardinality": "N:1",
-          "condition": "RAW_ORDER_ITEMS.QUANTITY = RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER",
-          "confidence": 1,
-          "fan_out": false,
-          "join_type": "LEFT",
-          "keys": [
-            "QUANTITY=METADATA_ROW_NUMBER"
-          ],
-          "left_table": "RAW_ORDER_ITEMS",
-          "reasoning": "set by reviewer",
-          "right_table": "RAW_WEBSITE_EVENTS",
-          "source": "manual",
-          "status": "CONFIRMED"
-        }
-      ],
-      "unreachable": [
-        "RAW_CUSTOMERS",
-        "RAW_EVENTS"
-      ]
+      "driving_table": "ADDRESS",
+      "joins": [],
+      "unreachable": []
     },
-    "join_paths": [
-      "RAW_ORDERS.ORDER_ID = RAW_ORDER_ITEMS.ORDER_ID",
-      "RAW_ORDER_ITEMS.PRODUCT_ID = RAW_PRODUCTS.PRODUCT_ID",
-      "RAW_ORDER_ITEMS.QUANTITY = RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER"
-    ],
-    "scd_type": "1",
+    "join_paths": [],
+    "scd_type": "1+HIST",
     "source_tables": [
-      "RAW_CUSTOMERS",
-      "RAW_EVENTS",
-      "RAW_ORDERS",
-      "RAW_ORDER_ITEMS",
-      "RAW_PRODUCTS",
-      "RAW_WEBSITE_EVENTS"
+      "ADDRESS"
     ],
-    "target_database": "DE_DEMO_PROD",
-    "target_schema": "SILVER",
-    "target_table": "DIM_CUSTOMERS"
+    "target_database": "DEV_GDP_SILVER_DB",
+    "target_schema": "PROPERTY",
+    "target_table": "PROPERTY_ADDRESS"
   },
   "lines": [
     {
-      "target_column": "CATEGORY",
-      "target_datatype": "VARCHAR(100)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "CATEGORY",
-      "mapping_type": "DIRECT",
+      "target_column": "ADDRESS_LINE_1",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.CATEGORY"
+      "business_definition": "Address Line 1."
     },
     {
-      "target_column": "CREATED_DATE",
-      "target_datatype": "VARCHAR(50)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "CREATED_DATE",
+      "target_column": "ADDRESS_LINE_2",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "PRIMARY_ADDRESS_LID",
+      "source_datatype": "VARCHAR(134217728)",
       "mapping_type": "DIRECT",
       "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.CREATED_DATE"
+      "business_definition": "Address Line 2."
     },
     {
-      "target_column": "CUSTOMER_ID",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "CUSTOMER_ID",
+      "target_column": "ADDRESS_MATCH_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Address Match Code."
+    },
+    {
+      "target_column": "ADDRESS_MATCH_SCORE",
+      "target_datatype": "NUMBER(38,2)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Address Match Score."
+    },
+    {
+      "target_column": "ADDRESS_PRECISION_CODE",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "PRECISION_CODE",
+      "source_datatype": "VARCHAR(134217728)",
       "mapping_type": "DIRECT",
       "transformation": null,
-      "business_definition": "From RAW_ORDERS.CUSTOMER_ID"
+      "business_definition": "Address Precision Code."
     },
     {
-      "target_column": "DISCOUNT_PCT",
-      "target_datatype": "NUMBER(5,2)",
-      "source_table": "RAW_ORDER_ITEMS",
-      "source_column": "DISCOUNT_PCT",
-      "mapping_type": "DIRECT",
+      "target_column": "CITY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_ORDER_ITEMS.DISCOUNT_PCT"
+      "business_definition": "City."
     },
     {
-      "target_column": "EVENT_DATA",
-      "target_datatype": "VARIANT",
-      "source_table": "RAW_EVENTS",
-      "source_column": "EVENT_DATA",
-      "mapping_type": "DIRECT",
+      "target_column": "COUNTRY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_EVENTS.EVENT_DATA"
+      "business_definition": "Country."
     },
     {
-      "target_column": "EVENT_TYPE",
-      "target_datatype": "VARCHAR(100)",
-      "source_table": "RAW_EVENTS",
-      "source_column": "EVENT_TYPE",
-      "mapping_type": "DIRECT",
+      "target_column": "COUNTRY_ISO2_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_EVENTS.EVENT_TYPE"
+      "business_definition": "Populated by LIGHTBOX only; NULL for other sources."
     },
     {
-      "target_column": "IS_ACTIVE",
-      "target_datatype": "VARCHAR(10)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "IS_ACTIVE",
-      "mapping_type": "DIRECT",
+      "target_column": "COUNTRY_ISO3_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.IS_ACTIVE"
+      "business_definition": "Populated by LIGHTBOX only; NULL for other sources."
     },
     {
-      "target_column": "LOAD_TIMESTAMP",
+      "target_column": "COUNTY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "County."
+    },
+    {
+      "target_column": "GDP_INSERTED_BY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "CURRENT_TIMESTAMP()::TIMESTAMP_NTZ",
+      "business_definition": "Inserting user (excluded from MERGE update)."
+    },
+    {
+      "target_column": "GDP_INSERTED_TS",
       "target_datatype": "TIMESTAMP_NTZ",
-      "source_table": "RAW_CUSTOMERS",
-      "source_column": "LOAD_TIMESTAMP",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_CUSTOMERS.LOAD_TIMESTAMP"
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "CURRENT_TIMESTAMP()::TIMESTAMP_NTZ",
+      "business_definition": "Insert timestamp (excluded from MERGE update)."
     },
     {
-      "target_column": "METADATA_FILENAME",
-      "target_datatype": "VARCHAR(500)",
-      "source_table": "RAW_WEBSITE_EVENTS",
-      "source_column": "METADATA_FILENAME",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_WEBSITE_EVENTS.METADATA_FILENAME"
+      "target_column": "GDP_IS_ACTIVE",
+      "target_datatype": "BOOLEAN",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "CURRENT_TIMESTAMP()::TIMESTAMP_NTZ",
+      "business_definition": "Soft-delete flag; FALSE for hard-deleted (orphaned) source rows."
     },
     {
-      "target_column": "METADATA_ROW_NUMBER",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_WEBSITE_EVENTS",
-      "source_column": "METADATA_ROW_NUMBER",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_WEBSITE_EVENTS.METADATA_ROW_NUMBER"
+      "target_column": "GDP_UPDATED_BY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "CURRENT_TIMESTAMP()::TIMESTAMP_NTZ",
+      "business_definition": "Last updating user."
     },
     {
-      "target_column": "ORDER_DATE",
-      "target_datatype": "VARCHAR(50)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "ORDER_DATE",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDERS.ORDER_DATE"
-    },
-    {
-      "target_column": "ORDER_ID",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "ORDER_ID",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDERS.ORDER_ID"
-    },
-    {
-      "target_column": "ORDER_ITEM_ID",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_ORDER_ITEMS",
-      "source_column": "ORDER_ITEM_ID",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDER_ITEMS.ORDER_ITEM_ID"
-    },
-    {
-      "target_column": "ORDER_STATUS",
-      "target_datatype": "VARCHAR(20)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "ORDER_STATUS",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDERS.ORDER_STATUS"
-    },
-    {
-      "target_column": "PAYMENT_METHOD",
-      "target_datatype": "VARCHAR(50)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "PAYMENT_METHOD",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDERS.PAYMENT_METHOD"
-    },
-    {
-      "target_column": "PRODUCT_ID",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_ORDER_ITEMS",
-      "source_column": "PRODUCT_ID",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDER_ITEMS.PRODUCT_ID"
-    },
-    {
-      "target_column": "PRODUCT_NAME",
-      "target_datatype": "VARCHAR(200)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "PRODUCT_NAME",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.PRODUCT_NAME"
-    },
-    {
-      "target_column": "QUANTITY",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_ORDER_ITEMS",
-      "source_column": "QUANTITY",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_ORDER_ITEMS.QUANTITY"
-    },
-    {
-      "target_column": "RAW_DATA",
-      "target_datatype": "VARIANT",
-      "source_table": "RAW_CUSTOMERS",
-      "source_column": "RAW_DATA",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_CUSTOMERS.RAW_DATA"
-    },
-    {
-      "target_column": "RECEIVED_AT",
+      "target_column": "GDP_UPDATED_TS",
       "target_datatype": "TIMESTAMP_NTZ",
-      "source_table": "RAW_EVENTS",
-      "source_column": "RECEIVED_AT",
-      "mapping_type": "DIRECT",
-      "transformation": null,
-      "business_definition": "From RAW_EVENTS.RECEIVED_AT"
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "CURRENT_TIMESTAMP()::TIMESTAMP_NTZ",
+      "business_definition": "Last update timestamp; drives Silver watermark."
     },
     {
-      "target_column": "RECORD_METADATA",
-      "target_datatype": "VARIANT",
-      "source_table": "RAW_CUSTOMERS",
-      "source_column": "RECORD_METADATA",
-      "mapping_type": "DIRECT",
+      "target_column": "GEOCODE_OUTPUT",
+      "target_datatype": "NUMBER(10,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_CUSTOMERS.RECORD_METADATA"
+      "business_definition": "Geocode Output."
     },
     {
-      "target_column": "SHIPPING_ADDRESS",
-      "target_datatype": "VARCHAR(500)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "SHIPPING_ADDRESS",
-      "mapping_type": "DIRECT",
+      "target_column": "GEOCODE_PROVIDER_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_ORDERS.SHIPPING_ADDRESS"
+      "business_definition": "Geocode Provider Name."
     },
     {
-      "target_column": "SOURCE_FILE",
-      "target_datatype": "VARCHAR(500)",
-      "source_table": "RAW_CUSTOMERS",
-      "source_column": "SOURCE_FILE",
+      "target_column": "GEOMETRY",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "GEOMETRY",
+      "source_datatype": "VARCHAR(134217728)",
       "mapping_type": "DIRECT",
       "transformation": null,
-      "business_definition": "From RAW_CUSTOMERS.SOURCE_FILE"
+      "business_definition": "Geometry."
     },
     {
-      "target_column": "SOURCE_SYSTEM",
-      "target_datatype": "VARCHAR(50)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "SOURCE_SYSTEM",
-      "mapping_type": "DIRECT",
+      "target_column": "LATITUDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_ORDERS.SOURCE_SYSTEM"
+      "business_definition": "Geocoded latitude (ESRI post-hook may update)."
     },
     {
-      "target_column": "SUB_CATEGORY",
-      "target_datatype": "VARCHAR(100)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "SUB_CATEGORY",
-      "mapping_type": "DIRECT",
+      "target_column": "LONGITUDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.SUB_CATEGORY"
+      "business_definition": "Geocoded longitude (ESRI post-hook may update)."
     },
     {
-      "target_column": "SUPPLIER_ID",
-      "target_datatype": "NUMBER(38,0)",
-      "source_table": "RAW_PRODUCTS",
-      "source_column": "SUPPLIER_ID",
-      "mapping_type": "DIRECT",
+      "target_column": "POSTAL_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_PRODUCTS.SUPPLIER_ID"
+      "business_definition": "Postal Code."
     },
     {
-      "target_column": "TOTAL_AMOUNT",
-      "target_datatype": "VARCHAR(50)",
-      "source_table": "RAW_ORDERS",
-      "source_column": "TOTAL_AMOUNT",
-      "mapping_type": "DIRECT",
+      "target_column": "POSTAL_CODE_EXTENSION",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
       "transformation": null,
-      "business_definition": "From RAW_ORDERS.TOTAL_AMOUNT"
+      "business_definition": "Postal Code Extension."
     },
     {
-      "target_column": "UNIT_PRICE",
-      "target_datatype": "NUMBER(10,2)",
-      "source_table": "RAW_ORDER_ITEMS",
-      "source_column": "UNIT_PRICE",
+      "target_column": "POST_STREET_DIRECTION_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Post Street Direction Name."
+    },
+    {
+      "target_column": "PRE_STREET_DIRECTION_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Pre Street Direction Name."
+    },
+    {
+      "target_column": "PROPERTY_ADDRESS_HKEY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "MD5(CAST(SOURCE_UNIQUE_ID || '|' || REF_GDP_SOURCE_SYSTEM_SKEY AS VARCHAR))",
+      "business_definition": "SHA2 change-detection hash; row merges only when hash or GDP_IS_ACTIVE changes."
+    },
+    {
+      "target_column": "PROPERTY_ADDRESS_SKEY",
+      "target_datatype": "NUMBER(19,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "MD5(CAST(SOURCE_UNIQUE_ID || '|' || REF_GDP_SOURCE_SYSTEM_SKEY AS VARCHAR))",
+      "business_definition": "Surrogate key from sequence SEQ_PROPERTY_ADDRESS_SKEY.NEXTVAL; existing key preserved on update."
+    },
+    {
+      "target_column": "PROPERTY_CORE_SKEY",
+      "target_datatype": "NUMBER(19,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "NULL /* resolved from the hub by the dbt model */",
+      "business_definition": "FK to PROPERTY_CORE.PROPERTY_CORE_SKEY (hub)."
+    },
+    {
+      "target_column": "REF_ADDRESS_TYPE_SKEY",
+      "target_datatype": "NUMBER(19,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "FK to PROPERTY.REF_ADDRESS_TYPE (address type)."
+    },
+    {
+      "target_column": "REF_GDP_SOURCE_SYSTEM_SKEY",
+      "target_datatype": "NUMBER(19,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "DERIVED",
+      "transformation": "'LIGHTBOX'",
+      "business_definition": "FK to SHARED.REF_GDP_SOURCE_SYSTEM.GDP_SOURCE_SYSTEM_SKEY."
+    },
+    {
+      "target_column": "SOURCE_ADDRESS_LINE_1",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "ADDRESS",
+      "source_datatype": "VARCHAR(134217728)",
       "mapping_type": "DIRECT",
       "transformation": null,
-      "business_definition": "From RAW_ORDER_ITEMS.UNIT_PRICE"
+      "business_definition": "Source Address Line 1."
+    },
+    {
+      "target_column": "SOURCE_ADDRESS_LINE_2",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Address Line 2."
+    },
+    {
+      "target_column": "SOURCE_CITY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source City."
+    },
+    {
+      "target_column": "SOURCE_COUNTRY_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Country Name."
+    },
+    {
+      "target_column": "SOURCE_COUNTY",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source County."
+    },
+    {
+      "target_column": "SOURCE_GEOCODE_OUTPUT",
+      "target_datatype": "NUMBER(10,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Geocode Output."
+    },
+    {
+      "target_column": "SOURCE_GEOCODE_OVERRIDE_SOURCE",
+      "target_datatype": "NUMBER(10,0)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Geocode Override Source."
+    },
+    {
+      "target_column": "SOURCE_LATITUDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Latitude."
+    },
+    {
+      "target_column": "SOURCE_LATITUDE_OVERRIDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Latitude Override."
+    },
+    {
+      "target_column": "SOURCE_LONGITUDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Longitude."
+    },
+    {
+      "target_column": "SOURCE_LONGITUDE_OVERRIDE",
+      "target_datatype": "NUMBER(18,15)",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Longitude Override."
+    },
+    {
+      "target_column": "SOURCE_POSTAL_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Postal Code."
+    },
+    {
+      "target_column": "SOURCE_POSTAL_CODE_EXTENSION",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Postal Code Extension."
+    },
+    {
+      "target_column": "SOURCE_POST_STREET_DIRECTION_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Post Street Direction Name."
+    },
+    {
+      "target_column": "SOURCE_PRE_STREET_DIRECTION_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Pre Street Direction Name."
+    },
+    {
+      "target_column": "SOURCE_STATE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source State."
+    },
+    {
+      "target_column": "SOURCE_STREET_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Name."
+    },
+    {
+      "target_column": "SOURCE_STREET_NAME_PRE_TYPE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Name Pre Type; NULL for EDP, LIGHTBOX, MTA and DIQ."
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_1",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Number 1."
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_2",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Number 2."
+    },
+    {
+      "target_column": "SOURCE_STREET_NUMBER_3",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Number 3."
+    },
+    {
+      "target_column": "SOURCE_STREET_TYPE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Source Street Type."
+    },
+    {
+      "target_column": "SOURCE_UNIQUE_ID",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "ADDRESS_LID",
+      "source_datatype": "VARCHAR(134217728)",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "Source record identifier (business key with REF_GDP_SOURCE_SYSTEM_SKEY)."
+    },
+    {
+      "target_column": "STATE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "State."
+    },
+    {
+      "target_column": "STATE_ISO_CODE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Populated by LIGHTBOX only; NULL for other sources."
+    },
+    {
+      "target_column": "STATE_PROVINCE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "State Province. Emitted by the model and in the hkey, but not present in PROD_GDP_SILVER_DB.PROPERTY.PROPERTY_ADDRESS at time of capture (verify DDL)."
+    },
+    {
+      "target_column": "STREET_NAME",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Street Name."
+    },
+    {
+      "target_column": "STREET_NAME_PRE_TYPE",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Street Name Pre Type; NULL for EDP, LIGHTBOX, MTA and DIQ."
+    },
+    {
+      "target_column": "STREET_NUMBER_1",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Street Number 1."
+    },
+    {
+      "target_column": "STREET_NUMBER_2",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Street Number 2."
+    },
+    {
+      "target_column": "STREET_NUMBER_3",
+      "target_datatype": "TEXT",
+      "source_table": null,
+      "source_column": null,
+      "source_datatype": null,
+      "mapping_type": "UNMAPPED",
+      "transformation": null,
+      "business_definition": "Street Number 3."
+    },
+    {
+      "target_column": "STREET_TYPE",
+      "target_datatype": "TEXT",
+      "source_table": "ADDRESS",
+      "source_column": "CREATED_TS",
+      "source_datatype": "TIMESTAMP_NTZ",
+      "mapping_type": "DIRECT",
+      "transformation": null,
+      "business_definition": "Street Type."
     }
   ]
 }

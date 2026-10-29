@@ -10,6 +10,6 @@ target-path: "target"
 clean-targets: ["target"]
 
 vars:
+  bronze_schema_lightbox: 'LIGHTBOX'
   bronze_db: 'DE_DEMO_PROD'
   bronze_schema_raw: 'RAW'
-
